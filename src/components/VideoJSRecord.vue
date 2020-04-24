@@ -1,5 +1,7 @@
 <template>
+    <div>
     <video id="myVideo" class="video-js vjs-default-skin" playsinline></video>
+    </div>
 </template>
 
 <script>
@@ -35,7 +37,7 @@
                             debug: true
                         }
                     }
-                }
+                },
             };
         },
         mounted() {
@@ -60,9 +62,28 @@
 
             // user completed recording and stream is available
             this.player.on('finishRecord', () => {
+                var saveData = (function () {
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    return function (blob, fileName) {
+                        var url = window.URL.createObjectURL(blob);
+                        a.href = url;
+                        a.download = fileName;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    };
+                }());
+
                 // the blob object contains the recorded data that
                 // can be downloaded by the user, stored on server etc.
+
                 console.log('finished recording: ', this.player.recordedData);
+                this.url = window.URL.createObjectURL(this.player.recordedData);
+                console.log(this.player.recordedData.name);
+                console.log(this.url);
+
+                saveData(this.player.recordedData, this.player.recordedData.name);
             });
 
             // error handling
